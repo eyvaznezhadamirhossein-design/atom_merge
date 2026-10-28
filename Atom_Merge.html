@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⚛️ کارخانه ادغام اتم‌ها</title>
+<style>
+*{box-sizing:border-box;user-select:none;-webkit-user-select:none}
+:root{--bg:#0a0f1f;--panel:#141c33;--panel2:#1b2444;--text:#f2f6ff;--muted:#a9b4d6;--gold:#ffd35a;--cyan:#56e6ff;--green:#50e3a4;--red:#ff637d}
+html,body{margin:0;min-height:100%;font-family:Tahoma,"Segoe UI",Arial,sans-serif;color:var(--text);
+ background:radial-gradient(circle at 15% 0%,#1b2c5e 0,#0a0f1f 55%,#05070f 100%)}
+body{overflow-x:hidden}
+button{font:inherit;cursor:pointer}
+#app{max-width:1180px;margin:auto;padding:14px;display:grid;grid-template-columns:1fr 270px;grid-template-rows:auto 1fr auto;gap:12px;min-height:100vh}
+@media(max-width:900px){#app{grid-template-columns:1fr}}
+/* ---------- header / progress ---------- */
+header{grid-column:1/-1;background:linear-gradient(135deg,#16224a,#241a4d);border:1px solid #ffffff14;border-radius:20px;padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 12px 40px #0007}
+.logo{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:26px;background:linear-gradient(135deg,#1d345e,#6a3bc9);box-shadow:0 0 24px #735cff55;animation:spinLogo 6s linear infinite}
+@keyframes spinLogo{50%{transform:rotate(180deg) scale(1.06)}100%{transform:rotate(360deg)}}
+header h1{font-size:19px;margin:0}header small{color:var(--muted)}
+.coinBox{margin-inline-start:auto;display:flex;gap:8px;align-items:center}
+.pill{background:#ffffff0e;border:1px solid #ffffff18;border-radius:999px;padding:8px 14px;font-size:14px}
+.pill b{color:var(--gold);font-size:16px}
+#progressWrap{flex-basis:100%;display:flex;align-items:center;gap:10px}
+#progressWrap label{font-size:12px;color:var(--muted);white-space:nowrap}
+.progress{flex:1;height:12px;background:#000a;border-radius:99px;overflow:hidden;border:1px solid #ffffff15}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),#9c7bff,var(--gold));transition:width .35s;border-radius:99px}
+/* ---------- playfield ---------- */
+#field{position:relative;background:
+ radial-gradient(circle at 30% 20%,#13204640,transparent 60%),
+ linear-gradient(145deg,#0e1530,#0a0e1e);
+ border:1px solid #ffffff12;border-radius:24px;overflow:hidden;min-height:420px;box-shadow:inset 0 0 80px #0008}
+#field .gridbg{position:absolute;inset:0;background-image:radial-gradient(#ffffff10 1px,transparent 1px);background-size:26px 26px;pointer-events:none}
+#msg{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#000a;border:1px solid #ffffff22;color:var(--cyan);padding:7px 16px;border-radius:99px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;z-index:5}
+#msg.show{opacity:1}
+.atom{position:absolute;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:15px;color:#fff;
+ cursor:grab;touch-action:none;z-index:3;transition:box-shadow .2s;will-change:transform;text-shadow:0 1px 3px #000a}
+.atom:active{cursor:grabbing;z-index:6}
+.atom .sym{pointer-events:none}
+.atom .ring{position:absolute;inset:-6px;border-radius:50%;border:2px dashed rgba(255,255,255,.25);animation:orbit 5s linear infinite;pointer-events:none}
+@keyframes orbit{to{transform:rotate(360deg)}}
+.atom.pop{animation:pop .35s}
+@keyframes pop{0%{transform:scale(.2)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.atom.mergeAnim{animation:mrg .3s}
+@keyframes mrg{50%{transform:scale(1.35);filter:brightness(1.8)}}
+.spark{position:absolute;border-radius:50%;pointer-events:none;animation:spark .6s ease-out forwards}
+@keyframes spark{to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+.h-H{background:radial-gradient(circle at 32% 28%,#bff0ff,#3aa7ff 55%,#0a4fa0);box-shadow:0 0 18px #3aa7ffcc,0 0 40px #3aa7ff55}
+.h-He{background:radial-gradient(circle at 32% 28%,#fff3c8,#ffb84d 55%,#b36b00);box-shadow:0 0 18px #ffb84dcc,0 0 40px #ffb84d55}
+.h-Li{background:radial-gradient(circle at 32% 28%,#ffd0d8,#ff5c7a 55%,#a01235);box-shadow:0 0 18px #ff5c7acc,0 0 40px #ff5c7a55}
+.h-Be{background:radial-gradient(circle at 32% 28%,#e6ffd9,#8be04e 55%,#3f7d10);box-shadow:0 0 18px #8be04ecc,0 0 40px #8be04e55}
+.h-B{background:radial-gradient(circle at 32% 28%,#f5e0ff,#c05cff 55%,#5c189c);box-shadow:0 0 18px #c05cffcc,0 0 40px #c05cff55}
+.h-C{background:radial-gradient(circle at 32% 28%,#e8e8e8,#7d7d8f 55%,#2c2c38);box-shadow:0 0 18px #9aa0b5cc,0 0 40px #7d7d8f55}
+.h-N{background:radial-gradient(circle at 32% 28%,#d5f6ff,#38b6e8 55%,#0d5b86);box-shadow:0 0 18px #38b6e8cc,0 0 40px #38b6e855}
+.h-O{background:radial-gradient(circle at 32% 28%,#ffe0e6,#ff4d6d 55%,#8f0d26);box-shadow:0 0 18px #ff4d6dcc,0 0 40px #ff4d6d55}
+.h-F{background:radial-gradient(circle at 32% 28%,#e0ffe8,#3fe87f 55%,#0d7a3a);box-shadow:0 0 18px #3fe87fcc,0 0 40px #3fe87f55}
+.h-Ne{background:radial-gradient(circle at 32% 28%,#ffe6ff,#ff4dff 55%,#8f0d8f);box-shadow:0 0 26px #ff4dffff,0 0 60px #ff4dff88;animation:neonPulse 1.2s ease-in-out infinite alternate}
+@keyframes neonPulse{from{filter:brightness(1)}to{filter:brightness(1.45)}}
+/* ---------- collector ---------- */
+aside{display:flex;flex-direction:column;gap:12px}
+.panel{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid #ffffff12;border-radius:20px;padding:14px;box-shadow:0 12px 40px #0006}
+.panel h3{margin:0 0 8px;font-size:15px}
+#collector{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+#collector .tube{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;font-size:44px;font-weight:900;
+ background:radial-gradient(circle,#1a0f22,#0d0714);border:3px solid #ff4dff;box-shadow:0 0 25px #ff4dff88,inset 0 0 30px #ff4dff33;transition:.3s}
+#collector .tube.glow{box-shadow:0 0 55px #ff4dffff,0 0 90px #ff4dff66,inset 0 0 40px #ff4dff66;transform:scale(1.08)}
+#collector small{color:var(--muted);line-height:1.8}
+.btn{border:0;border-radius:14px;padding:11px 16px;font-weight:900;color:#081020;background:linear-gradient(135deg,#56e6ff,#3aa7ff);transition:.15s;width:100%}
+.btn:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.gold{background:linear-gradient(135deg,#ffd35a,#ff9d3a)}
+.btn.green{background:linear-gradient(135deg,#50e3a4,#2bbf8a)}
+/* ---------- bottom bars ---------- */
+footer{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:760px){footer{grid-template-columns:1fr}}
+.upRow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:520px){.upRow{grid-template-columns:repeat(2,1fr)}}
+.up{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid #ffffff14;border-radius:16px;padding:10px 8px;color:var(--text);text-align:center;transition:.15s;position:relative}
+.up:hover:not(:disabled){transform:translateY(-3px);border-color:#56e6ff66}
+.up:disabled{opacity:.45;cursor:not-allowed}
+.up .ic{font-size:20px}
+.up b{display:block;font-size:13px;margin:4px 0 2px;color:var(--cyan)}
+.up .price{color:var(--gold);font-size:12px;font-weight:900}
+.up.owned{border-color:var(--green);box-shadow:0 0 14px #50e3a455}
+.up.owned:after{content:"✔ فعال";position:absolute;top:4px;left:6px;font-size:10px;color:var(--green)}
+.shopGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:7px}
+.shopBtn{border:0;border-radius:12px;padding:8px 4px;font-weight:900;color:#fff;font-size:12px;transition:.15s;position:relative;overflow:hidden}
+.shopBtn:hover:not(:disabled){transform:scale(1.06)}
+.shopBtn:disabled{opacity:.4;cursor:not-allowed}
+.shopBtn small{display:block;font-size:10px;opacity:.9;font-weight:400;margin-top:2px}
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block;vertical-align:-2px;margin-inline-end:4px}
+#floaters{position:fixed;inset:0;pointer-events:none;z-index:50}
+.float{position:absolute;font-weight:900;color:var(--gold);text-shadow:0 0 10px #ffd35a88;animation:fl 1.1s ease-out forwards;font-size:18px}
+@keyframes fl{to{transform:translateY(-70px);opacity:0}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">⚛</div>
+    <div><h1>کارخانه ادغام اتم‌ها</h1><small>هیدروژن بگیر، ادغام کن، به نئون برس!</small></div>
+    <div class="coinBox">
+      <div class="pill">🪙 سکه‌ها: <b id="coins">0</b></div>
+      <div class="pill">⏱ تولید: <b id="spawnInfo">8s</b></div>
+      <div class="pill">🧪 اتم‌ها: <b id="atomCount">0</b></div>
+    </div>
+    <div id="progressWrap">
+      <label>مسیر تا نئون:</label>
+      <div class="progress"><i id="progBar"></i></div>
+      <label id="progText">H</label>
+    </div>
+  </header>
+
+  <div id="field">
+    <div class="gridbg"></div>
+    <div id="msg"></div>
+  </div>
+
+  <aside>
+    <div class="panel" id="collector">
+      <h3>🌈 جمع‌آورِ نئون</h3>
+      <div class="tube" id="tube">0<small style="font-size:16px">/10</small></div>
+      <small>هر <b style="color:#ff9dff">۱۰ اتم نئون</b> بدهید<br>و <b style="color:var(--gold)">۳۰۰ سکه</b> بگیرید!</small>
+      <button class="btn gold" id="collectBtn" disabled>تحویل نئون‌ها (۰/۱۰)</button>
+    </div>
+    <div class="panel">
+      <h3>📖 زنجیرهٔ ادغام</h3>
+      <small style="color:var(--muted);line-height:2">
+        H+H=He • He+He=Li • Li+Li=Be<br>
+        Be+Be=B • B+B=C • C+C=N<br>
+        N+N=O • O+O=F • F+F=Ne
+      </small>
+    </div>
+  </aside>
+
+  <footer>
+    <div class="panel">
+      <h3>⚙️ ارتقاهای تولید</h3>
+      <div class="upRow">
+        <button class="up" data-cost="350" data-sec="6"><span class="ic">⚡</span><b>تولید ۶ ثانیه</b><span class="price">۳۵۰ 🪙</span></button>
+        <button class="up" data-cost="500" data-sec="4"><span class="ic">⚡⚡</span><b>تولید ۴ ثانیه</b><span class="price">۵۰۰ 🪙</span></button>
+        <button class="up" data-cost="700" data-sec="3"><span class="ic">🔥</span><b>تولید ۳ ثانیه</b><span class="price">۷۰۰ 🪙</span></button>
+        <button class="up" data-cost="10" data-sec="1"><span class="ic">🚀</span><b>تولید ۲ ثانیه</b><span class="price">۱۰۰۰ 🪙</span></button>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>🛒 فروشگاه اتم</h3>
+      <div class="shopGrid" id="shop"></div>
+    </div>
+  </footer>
+</div>
+<div id="floaters"></div>
+
+<script>
+"use strict";
+/* ---------- data ---------- */
+const CHAIN = {H:"He",He:"Li",Li:"Be",Be:"B",B:"C",C:"N",N:"O",O:"F",F:"Ne"};
+const LEVEL = {H:1,He:2,Li:3,Be:4,B:5,C:6,N:7,O:8,F:9,Ne:10};
+const NAME  = {H:"هیدروژن",He:"هلیم",Li:"لیتیم",Be:"بریلیم",B:"بور",C:"کربن",N:"نیتروژن",O:"اکسیژن",F:"فلوئور",Ne:"نئون"};
+const SHOP  = {H:40,He:90,Li:180,Be:320,B:520,C:800,N:1150,O:1600,F:2100,Ne:2};
+const FA    = n => n.toLocaleString("fa-IR");
+
+/* ---------- state ---------- */
+let coins = 200, spawnSec = 8, neon = 0;
+let upgradesBought = {};
+const field = document.getElementById("field");
+const msgEl = document.getElementById("msg");
+let msgTimer;
+
+/* ---------- helpers ---------- */
+function msg(t){msgEl.textContent=t;msgEl.classList.add("show");clearTimeout(msgTimer);msgTimer=setTimeout(()=>msgEl.classList.remove("show"),1800);}
+function floatText(x,y,t){const f=document.createElement("div");f.className="float";f.textContent=t;f.style.left=x+"px";f.style.top=y+"px";
+ document.getElementById("floaters").appendChild(f);setTimeout(()=>f.remove(),1100);}
+function updateUI(){
+  document.getElementById("coins").textContent=FA(coins);
+  document.getElementById("spawnInfo").textContent=spawnSec+"s";
+  const atoms=field.querySelectorAll(".atom").length;
+  document.getElementById("atomCount").textContent=FA(atoms);
+  document.getElementById("tube").innerHTML=FA(neon)+'<small style="font-size:16px">/۱۰</small>';
+  document.getElementById("tube").classList.toggle("glow",neon>=10);
+  const cb=document.getElementById("collectBtn");
+  cb.disabled=neon<10;cb.textContent="تحویل نئون‌ها ("+FA(neon)+"/۱۰)";
+  document.querySelectorAll(".up").forEach(b=>{
+    const ok=!upgradesBought[b.dataset.sec]&&coins>=+b.dataset.cost;
+    b.disabled=!ok;b.classList.toggle("owned",!!upgradesBought[b.dataset.sec]);
+  });
+  document.querySelectorAll(".shopBtn").forEach(b=>b.disabled=coins<SHOP[b.dataset.el]);
+  // progress: best atom level on field
+  let best=1;
+  field.querySelectorAll(".atom").forEach(a=>best=Math.max(best,LEVEL[a.dataset.el]));
+  document.getElementById("progBar").style.width=((best-1)/9*100)+"%";
+  document.getElementById("progText").textContent=Object.keys(LEVEL)[best-1]+" ("+FA(best)+"/۱۰)";
+}
+
+/* ---------- spawning ---------- */
+function spawnAtom(){
+  const el="H";
+  const w=field.clientWidth,h=field.clientHeight,s=58;
+  const x=20+Math.random()*(w-s-40), y=30+Math.random()*(h-s-60);
+  makeAtom(el,x,y,true);
+  msg("⚛ یک اتم هیدروژن تولید شد!");
+  updateUI();
+}
+function makeAtom(el,x,y,pop){
+  const a=document.createElement("div");
+  a.className="atom h-"+el+(pop?" pop":"");
+  a.dataset.el=el;
+  a.innerHTML='<span class="sym">'+el+'</span><span class="ring"></span>';
+  a.style.left=x+"px";a.style.top=y+"px";
+  field.appendChild(a);
+  dragify(a);
+  return a;
+}
+
+/* ---------- drag ---------- */
+let drag=null;
+function dragify(a){
+  a.addEventListener("pointerdown",e=>{
+    e.preventDefault();drag=a;a.setPointerCapture(e.pointerId);
+    a._dx=e.clientX-a.offsetLeft;a._dy=e.clientY-a.offsetTop;
+  });
+  a.addEventListener("pointermove",e=>{
+    if(drag!==a)return;
+    a.style.left=Math.max(0,Math.min(field.clientWidth-a.offsetWidth,e.clientX-a._dx))+"px";
+    a.style.top =Math.max(0,Math.min(field.clientHeight-a.offsetHeight,e.clientY-a._dy))+"px";
+  });
+  a.addEventListener("pointerup",e=>{
+    if(drag!==a)return;drag=null;
+    tryMerge(a);
+  });
+  a.addEventListener("pointercancel",()=>{if(drag===a)drag=null;});
+}
+
+/* ---------- merge ---------- */
+function tryMerge(a){
+  const el=a.dataset.el, nxt=CHAIN[el]; if(!nxt)return;
+  const ax=a.offsetLeft+a.offsetWidth/2, ay=a.offsetTop+a.offsetHeight/2;
+  let bestB=null,bd=1e9;
+  field.querySelectorAll(".atom").forEach(b=>{
+    if(b===a||b.dataset.el!==el)return;
+    const bx=b.offsetLeft+b.offsetWidth/2, by=b.offsetTop+b.offsetHeight/2;
+    const d=Math.hypot(ax-bx,ay-by);
+    if(d<85&&d<bd){bd=d;bestB=b;}
+  });
+  if(!bestB)return;
+  const bx=bestB.offsetLeft+bestB.offsetWidth/2, by=bestB.offsetTop+bestB.offsetHeight/2;
+  bestB.remove();
+  // sparkle burst
+  for(let i=0;i<10;i++){
+    const s=document.createElement("div");s.className="spark";
+    const ang=Math.random()*Math.PI*2,r=20+Math.random()*40;
+    s.style.cssText=`left:${bx-4}px;top:${by-4}px;width:8px;height:8px;background:#fff;--dx:${Math.cos(ang)*r}px;--dy:${Math.sin(ang)*r}px`;
+    field.appendChild(s);setTimeout(()=>s.remove(),650);
+  }
+  a.classList.remove("pop");void a.offsetWidth;a.classList.add("mergeAnim");
+  a.style.left=(bx-a.offsetWidth/2)+"px";a.style.top=(by-a.offsetHeight/2)+"px";
+  a.dataset.el=nxt;a.className="atom h-"+nxt+" mergeAnim pop";
+  a.querySelector(".sym").textContent=nxt;
+  setTimeout(()=>a.classList.remove("mergeAnim"),350);
+  msg(nxt==="Ne"?"💎 نئون ساخته شد! آن را تحویل دهید":"✨ ادغام: "+el+" + "+el+" = "+nxt+" ("+NAME[nxt]+")");
+  if(nxt==="Ne"){neon++;}
+  updateUI();
+}
+
+/* ---------- collector ---------- */
+document.getElementById("collectBtn").onclick=e=>{
+  if(neon<10)return;
+  const batches=Math.floor(neon/10);neon-=batches*10;
+  const gain=batches*300;coins+=gain;
+  const r=e.target.getBoundingClientRect();
+  floatText(r.left+r.width/2,r.top,"+"+FA(gain)+" 🪙");
+  // remove up to batches*10 Ne atoms from field
+  let need=batches*10;
+  field.querySelectorAll(".atom.h-Ne").forEach(a=>{
+    if(need>0){a.remove();need--;}
+  });
+  msg("🌈 "+FA(batches*10)+" نئون تحویل شد → "+FA(gain)+" سکه!");
+  updateUI();
+};
+
+/* ---------- upgrades ---------- */
+document.querySelectorAll(".up").forEach(b=>{
+  b.onclick=()=>{
+    const cost=+b.dataset.cost;
+    if(upgradesBought[b.dataset.sec]||coins<cost)return;
+    coins-=cost;spawnSec=+b.dataset.sec;upgradesBought[b.dataset.sec]=true;
+    restartTimer();
+    msg("⚙️ سرعت تولید به "+spawnSec+" ثانیه رسید!");
+    updateUI();
+  };
+});
+
+/* ---------- shop ---------- */
+const shopGrid=document.getElementById("shop");
+Object.keys(SHOP).forEach(el=>{
+  const btn=document.createElement("button");
+  btn.className="shopBtn h-"+el;
+  btn.dataset.el=el;
+  btn.innerHTML='<span class="dot" style="background:radial-gradient(circle at 32% 28%,#fff3,#fff0)"></span>'+el+
+    "<small>"+FA(SHOP[el])+" 🪙</small>";
+  btn.onclick=e=>{
+    if(coins<SHOP[el])return;
+    coins-=SHOP[el];
+    const w=field.clientWidth,h=field.clientHeight;
+    const a=makeAtom(el,20+Math.random()*(w-98),30+Math.random()*(h-118),true);
+    const r=btn.getBoundingClientRect();
+    floatText(r.left+r.width/2,r.top,"-"+FA(SHOP[el])+" 🪙");
+    if(el==="Ne")neon++;
+    msg("🛒 "+NAME[el]+" ("+el+") خریداری شد!");
+    updateUI();
+  };
+  shopGrid.appendChild(btn);
+});
+
+/* ---------- timer ---------- */
+let timer;
+function restartTimer(){clearInterval(timer);timer=setInterval(spawnAtom,spawnSec*1000);}
+restartTimer();
+
+/* initial atoms + first spawn */
+spawnAtom();
+updateUI();
+</script>
+</body>
+</html>
